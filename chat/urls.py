@@ -1,5 +1,6 @@
 from django.urls import path
+from .views import GroupMessagesView
 
 urlpatterns = [
-    # Aquí luego pondremos endpoints de chat
+    path("groups/<int:group_id>/messages/", GroupMessagesView.as_view(), name="group-messages"),
 ]
