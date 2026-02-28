@@ -1,0 +1,32 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GroupsApp</title>
+</head>
+<body>
+
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+
+    <h2>Crear Grupo</h2>
+    <input type="text" id="groupName" placeholder="Nombre del grupo">
+    <button onclick="createGroup()">Crear</button>
+
+    <h2>Agregar Miembro</h2>
+    <input type="number" id="groupIdAdd" placeholder="ID del grupo">
+    <input type="text" id="usernameToAdd" placeholder="Username a agregar">
+    <button onclick="addMember()">Agregar</button>
+
+    <h2>Enviar Mensaje</h2>
+    <input type="number" id="groupIdMsg" placeholder="ID del grupo">
+    <input type="text" id="messageContent" placeholder="Mensaje">
+    <button onclick="sendMessage()">Enviar</button>
+
+    
+    <script src="{% static 'js/app.js' %}"></script>
+</body>
+
+</html>

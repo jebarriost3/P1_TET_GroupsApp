@@ -14,6 +14,8 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from turtle import home
+
 from django.http import JsonResponse
 from django.contrib import admin
 from django.urls import path, include
@@ -26,6 +28,7 @@ urlpatterns = [
     path('api/auth/', include('accounts.urls')),
     path('api/groups/', include('groups.urls')),
     path('api/chat/', include('chat.urls')),   
+    path("", include("frontend.urls")),
 ]
 
 if settings.DEBUG:
