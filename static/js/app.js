@@ -1,3 +1,24 @@
+window.onload = function() {
+
+    const savedToken = localStorage.getItem("token");
+    const savedUser = localStorage.getItem("username");
+
+    if (savedToken) {
+
+        token = savedToken;
+        currentUser = savedUser;
+
+        document.getElementById("loginScreen").style.display = "none";
+        document.getElementById("appScreen").style.display = "block";
+
+        document.getElementById("userInfo").innerText = currentUser;
+
+        loadGroups();
+    }
+
+};
+
+
 let token = null;
 let currentUser = null;
 let currentGroupId = null;
@@ -16,8 +37,18 @@ async function login() {
 
     const data = await response.json();
 
+  
+    if (!response.ok) {
+        alert("Usuario o contraseña incorrectos");
+        return;
+    }
+
+    
     token = data.access;
     currentUser = username;
+
+    localStorage.setItem("token", token);
+    localStorage.setItem("username", username)
 
     document.getElementById("loginScreen").style.display = "none";
     document.getElementById("appScreen").style.display = "block";
@@ -50,25 +81,19 @@ async function loadGroups() {
 }
 
 function selectGroup(groupId, groupName) {
+
     currentGroupId = groupId;
 
-    document.getElementById("dashboard").style.display = "none";
-    document.getElementById("chatArea").style.display = "block";
-
     document.getElementById("chatHeader").innerText = groupName;
-
 
     document.querySelector(".sidebar").classList.remove("centered-dashboard");
 
     loadMessages();
+
 }
 
 function backToGroups() {
-    document.getElementById("chatArea").style.display = "none";
-    document.getElementById("dashboard").style.display = "block";
-
-
-    document.querySelector(".sidebar").classList.add("centered-dashboard");
+    currentGroupId = null;
 }
 
 // messages
@@ -91,7 +116,7 @@ async function loadMessages() {
             div.classList.add("me");
         }
 
-        div.innerText = msg.sender + ": " + msg.content;
+        div.innerText = msg.sender_username + ": " + msg.content;
         container.appendChild(div);
     });
 
@@ -127,9 +152,19 @@ async function sendMessage() {
 
 // create group
 
-async function createGroupPrompt() {
-    const name = prompt("Nombre del grupo:");
-    if (!name) return;
+function openCreateGroupModal() {
+    document.getElementById("createGroupModal").style.display = "flex";
+}
+
+function closeModal() {
+    document.getElementById("createGroupModal").style.display = "none";
+}
+
+async function createGroup() {
+
+    const name = document.getElementById("newGroupName").value;
+
+    if (!name.trim()) return;
 
     await fetch("http://127.0.0.1:8000/api/groups/", {
         method: "POST",
@@ -140,5 +175,37 @@ async function createGroupPrompt() {
         body: JSON.stringify({ name })
     });
 
+    document.getElementById("newGroupName").value = "";
+
+    closeModal();
+
     loadGroups();
+}
+
+function toggleUserMenu() {
+
+    const menu = document.getElementById("userDropdown");
+
+    if (menu.style.display === "block") {
+        menu.style.display = "none";
+    } else {
+        menu.style.display = "block";
+    }
+
+}
+
+function logout() {
+
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+
+    token = null;
+    currentUser = null;
+    currentGroupId = null;
+
+    document.getElementById("appScreen").style.display = "none";
+    
+    document.getElementById("appScreen").style.display = "none";
+    document.getElementById("loginScreen").style.display = "flex";
+
 }

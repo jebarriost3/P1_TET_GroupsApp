@@ -1,58 +1,124 @@
 {% load static %}
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>GroupsApp</title>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
+
 <body>
 
-
-
+<!-- LOGIN -->
 <div id="loginScreen" class="centered">
+
     <div class="login-card">
-        <h2>Login</h2>
-        <input type="text" id="username" placeholder="Username">
-        <input type="password" id="password" placeholder="Password">
-        <button onclick="login()">Entrar</button>
+        <h2>GroupsApp</h2>
+
+        <input type="text" id="username" placeholder="Usuario">
+        <input type="password" id="password" placeholder="Contraseña" onkeydown="if(event.key === 'Enter') login()">
+<center><button onclick="login()">Entrar</button></center>
+        
     </div>
+
 </div>
 
-
-
+<!-- APP -->
 <div id="appScreen" style="display:none;">
 
+    <!-- TOPBAR -->
     <div class="topbar">
-        <h3>GroupsApp</h3>
-        <div id="userInfo"></div>
-    </div>
 
-    <div class="layout">
-
-        <div class="sidebar" id="dashboard">
-            <button onclick="createGroupPrompt()">+ Crear Grupo</button>
-            <div id="groupsList"></div>
+        <div class="logo">
+            GroupsApp
         </div>
 
-     
-        <div class="chat-area" id="chatArea" style="display:none;">
+        <div class="user-menu">
 
-            <button onclick="backToGroups()" class="back-btn">⬅ Volver</button>
+    <div id="userInfo" onclick="toggleUserMenu()"></div>
 
-            <div id="chatHeader"></div>
+    <div id="userDropdown" class="dropdown-menu">
+        <div class="dropdown-item" onclick="logout()">Cerrar sesión</div>
+    </div>
+
+</div>
+
+    </div>
+
+
+    <div class="app-layout">
+
+<div id="createGroupModal" class="modal">
+
+    <div class="modal-content">
+
+        <h3>Crear Grupo</h3>
+
+        <input 
+            type="text" 
+            id="newGroupName" 
+            placeholder="Nombre del grupo"
+        >
+
+        <div class="modal-buttons">
+
+            <button onclick="createGroup()">Crear</button>
+
+            <button onclick="closeModal()">Cancelar</button>
+
+        </div>
+
+    </div>
+
+</div>
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+
+            <div class="sidebar-header">
+
+                <button onclick="openCreateGroupModal()">
+                    + Nuevo Grupo
+                </button>
+
+            </div>
+
+            <div id="groupsList"></div>
+
+        </div>
+
+
+        <!-- CHAT -->
+        <div id="chatArea" class="chat-area">
+
+            <div id="chatHeader">
+                Selecciona un grupo
+            </div>
 
             <div id="messagesContainer"></div>
 
             <div class="message-input">
-                <input type="text" id="messageContent" placeholder="Escribe un mensaje...">
-                <button onclick="sendMessage()">Enviar</button>
+
+                <input
+                    type="text"
+                    id="messageContent"
+                    placeholder="Escribe un mensaje..." 
+                    onkeydown="if(event.key === 'Enter') sendMessage()">
+
+                <button id="sendButton" onclick="sendMessage()">
+                      <svg viewBox="0 0 24 24">
+                      <polygon points="2,21 23,12 2,3 5,12"/>
+                 </svg>
+</button>
+
             </div>
 
         </div>
 
     </div>
+
 </div>
 
 <script src="{% static 'js/app.js' %}"></script>
+
 </body>
 </html>

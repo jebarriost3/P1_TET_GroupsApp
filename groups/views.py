@@ -3,12 +3,17 @@ from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
+
+
 
 from .models import Group, Membership
 from .serializers import GroupSerializer, AddMemberSerializer
 
 
 @api_view(["GET", "POST"])
+@permission_classes([IsAuthenticated])
 def groups_list_create(request):
     if request.method == "GET":
         # Mis grupos (donde soy miembro)
