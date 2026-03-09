@@ -1,3 +1,12 @@
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    min-height: 100vh;
+}
+
 body{
     margin:0;
     font-family:Arial, Helvetica, sans-serif;
@@ -59,10 +68,15 @@ button:active{
 }
 
 /* LAYOUT */
-
+#appScreen {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
 .app-layout{
-    display:flex;
-    height:calc(100vh - 50px);
+    flex: 1;
+    display: flex;
+    min-height: 0;
 }
 
 /* SIDEBAR */
@@ -72,6 +86,9 @@ button:active{
     background:#ffffff;
     border-right:1px solid #ddd;
     padding:15px;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
 }
 
 .sidebar-header{
@@ -94,9 +111,10 @@ button:active{
 /* CHAT */
 
 .chat-area{
-    flex:1;
-    display:flex;
-    flex-direction:column;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 
 #chatHeader{
@@ -106,10 +124,11 @@ button:active{
 }
 
 #messagesContainer{
-    flex:1;
-    padding:20px;
-    overflow-y:auto;
-    background:#e5ddd5;
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background: #e5ddd5;
+    min-height: 0;
 }
 
 .message{
@@ -128,10 +147,12 @@ button:active{
 /* INPUT */
 
 .message-input{
-    display:flex;
-    padding:20px;
-    background:white;
-    border-top:1px solid #ddd;
+    display: flex;
+    padding: 20px;
+    background: white;
+    border-top: 1px solid #ddd;
+    flex-shrink: 0;
+    align-items: center;
 }
 
 .message-input input{

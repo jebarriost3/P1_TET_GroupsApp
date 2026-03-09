@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login - GroupsApp</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+
+<body>
+
+<div class="centered">
+
+    <div class="login-card">
+
+        <h2>GroupsApp</h2>
+
+        <input type="text" id="username" placeholder="Usuario">
+
+        <input type="password" id="password" placeholder="Contraseña"
+        onkeydown="if(event.key === 'Enter') login()">
+
+        <center>
+            <button onclick="login()">Entrar</button>
+        </center>
+
+        <p style="margin-top:15px; text-align:center;">
+            ¿No tienes cuenta? <a href="/register/">Regístrate</a>
+        </p>
+
+        <p style="text-align:center;">
+            <a href="/">Volver al inicio</a>
+        </p>
+
+    </div>
+
+</div>
+
+<script src="{% static 'js/app.js' %}"></script>
+
+</body>
+</html>

@@ -1,0 +1,88 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GroupsApp</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+
+<body>
+
+<div id="appScreen">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <div class="logo">GroupsApp</div>
+
+        <div class="user-menu">
+            <div id="userInfo" onclick="toggleUserMenu()"></div>
+
+            <div id="userDropdown" class="dropdown-menu">
+                <div class="dropdown-item" onclick="logout()">Cerrar sesión</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CREAR GRUPO -->
+    <div id="createGroupModal" class="modal">
+        <div class="modal-content">
+            <h3>Crear Grupo</h3>
+
+            <input
+                type="text"
+                id="newGroupName"
+                placeholder="Nombre del grupo"
+            >
+
+            <div class="modal-buttons">
+                <button onclick="createGroup()">Crear</button>
+                <button onclick="closeModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LAYOUT PRINCIPAL -->
+    <div class="app-layout">
+
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <button onclick="openCreateGroupModal()">+ Nuevo Grupo</button>
+
+                <button onclick="addMemberPrompt()" style="margin-top:10px;">
+                    + Agregar miembro
+                </button>
+            </div>
+
+            <div id="groupsList"></div>
+        </div>
+
+        <!-- CHAT -->
+        <div id="chatArea" class="chat-area">
+            <div id="chatHeader">Selecciona un grupo</div>
+
+            <div id="messagesContainer"></div>
+
+            <div class="message-input">
+                <input
+                    type="text"
+                    id="messageContent"
+                    placeholder="Escribe un mensaje..."
+                    onkeydown="if(event.key === 'Enter') sendMessage()"
+                >
+
+                <button id="sendButton" onclick="sendMessage()">
+                    <svg viewBox="0 0 24 24">
+                        <polygon points="2,21 23,12 2,3 5,12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="{% static 'js/app.js' %}"></script>
+
+</body>
+</html>

@@ -1,0 +1,43 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Registro - GroupsApp</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+
+<body>
+
+<div class="centered">
+
+    <div class="login-card">
+
+        <h2>Registro</h2>
+
+        <input type="text" id="registerUsername" placeholder="Usuario">
+
+        <input type="email" id="registerEmail" placeholder="Correo">
+
+        <input type="password" id="registerPassword" placeholder="Contraseña"
+               onkeydown="if(event.key === 'Enter') registerUser()">
+
+        <center>
+            <button onclick="registerUser()">Registrarse</button>
+        </center>
+
+        <p style="margin-top:15px; text-align:center;">
+            ¿Ya tienes cuenta? <a href="/login/">Inicia sesión</a>
+        </p>
+
+        <p style="text-align:center;">
+            <a href="/">Volver al inicio</a>
+        </p>
+
+    </div>
+
+</div>
+
+<script src="{% static 'js/app.js' %}"></script>
+
+</body>
+</html>

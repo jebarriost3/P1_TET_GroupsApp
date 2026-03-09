@@ -1,35 +1,41 @@
-window.onload = function() {
+let token = localStorage.getItem("token") || null;
+let currentUser = localStorage.getItem("username") || null;
+let currentGroupId = localStorage.getItem("selectedGroupId") || null;
 
-    const savedToken = localStorage.getItem("token");
-    const savedUser = localStorage.getItem("username");
+// --------------------
+// INIT
+// --------------------
+window.onload = function () {
+    const path = window.location.pathname;
 
-    if (savedToken) {
+    // Si está en /app/, exige login
+    if (path === "/app/") {
+        if (!token) {
+            window.location.href = "/login/";
+            return;
+        }
 
-        token = savedToken;
-        currentUser = savedUser;
-
-        document.getElementById("loginScreen").style.display = "none";
-        document.getElementById("appScreen").style.display = "block";
-
-        document.getElementById("userInfo").innerText = currentUser;
+        const userInfo = document.getElementById("userInfo");
+        if (userInfo) {
+            userInfo.innerText = currentUser || "";
+        }
 
         loadGroups();
-    }
 
+        if (currentGroupId) {
+            loadMessages();
+        }
+    }
 };
 
-
-let token = null;
-let currentUser = null;
-let currentGroupId = null;
-
-// login
-
+// --------------------
+// AUTH
+// --------------------
 async function login() {
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
+    const username = document.getElementById("username")?.value;
+    const password = document.getElementById("password")?.value;
 
-    const response = await fetch("http://127.0.0.1:8000/api/auth/login/", {
+    const response = await fetch("/api/auth/login/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password })
@@ -37,38 +43,73 @@ async function login() {
 
     const data = await response.json();
 
-  
     if (!response.ok) {
         alert("Usuario o contraseña incorrectos");
         return;
     }
 
-    
     token = data.access;
     currentUser = username;
 
     localStorage.setItem("token", token);
-    localStorage.setItem("username", username)
+    localStorage.setItem("username", username);
 
-    document.getElementById("loginScreen").style.display = "none";
-    document.getElementById("appScreen").style.display = "block";
-
-    document.getElementById("userInfo").innerText = username;
-
-    loadGroups();
-
-    document.querySelector(".sidebar").classList.add("centered-dashboard");
+    window.location.href = "/app/";
 }
 
-// groups
+async function registerUser() {
+    const username = document.getElementById("registerUsername")?.value;
+    const email = document.getElementById("registerEmail")?.value;
+    const password = document.getElementById("registerPassword")?.value;
 
+    const response = await fetch("/api/auth/register/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, email, password })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        alert(data.detail || "No se pudo registrar el usuario");
+        return;
+    }
+
+    alert("Usuario registrado correctamente");
+    window.location.href = "/login/";
+}
+
+function logout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    localStorage.removeItem("selectedGroupId");
+
+    token = null;
+    currentUser = null;
+    currentGroupId = null;
+
+    window.location.href = "/login/";
+}
+
+// --------------------
+// GROUPS
+// --------------------
 async function loadGroups() {
-    const response = await fetch("http://127.0.0.1:8000/api/groups/", {
+    const response = await fetch("/api/groups/", {
         headers: { "Authorization": "Bearer " + token }
     });
 
+    if (!response.ok) {
+        if (response.status === 401) {
+            logout();
+        }
+        return;
+    }
+
     const groups = await response.json();
     const container = document.getElementById("groupsList");
+    if (!container) return;
+
     container.innerHTML = "";
 
     groups.forEach(group => {
@@ -81,38 +122,73 @@ async function loadGroups() {
 }
 
 function selectGroup(groupId, groupName) {
-
     currentGroupId = groupId;
+    localStorage.setItem("selectedGroupId", groupId);
 
-    document.getElementById("chatHeader").innerText = groupName;
-
-    document.querySelector(".sidebar").classList.remove("centered-dashboard");
+    const chatHeader = document.getElementById("chatHeader");
+    if (chatHeader) {
+        chatHeader.innerText = groupName;
+    }
 
     loadMessages();
-
 }
 
-function backToGroups() {
-    currentGroupId = null;
+async function addMemberPrompt() {
+    if (!currentGroupId) {
+        alert("Primero selecciona un grupo");
+        return;
+    }
+
+    const username = prompt("Ingresa el username del usuario a agregar:");
+    if (!username) return;
+
+    const response = await fetch(`/api/groups/${currentGroupId}/members/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({ username })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        alert(data.detail || "No se pudo agregar el usuario");
+        return;
+    }
+
+    alert(data.detail || "Usuario agregado correctamente");
 }
 
-// messages
-
+// --------------------
+// MESSAGES
+// --------------------
 async function loadMessages() {
-    const response = await fetch(
-        `http://127.0.0.1:8000/api/chat/groups/${currentGroupId}/messages/`,
-        { headers: { "Authorization": "Bearer " + token } }
-    );
+    if (!currentGroupId) return;
+
+    const response = await fetch(`/api/chat/groups/${currentGroupId}/messages/`, {
+        headers: { "Authorization": "Bearer " + token }
+    });
+
+    if (!response.ok) {
+        if (response.status === 401) {
+            logout();
+        }
+        return;
+    }
 
     const messages = await response.json();
     const container = document.getElementById("messagesContainer");
+    if (!container) return;
+
     container.innerHTML = "";
 
     messages.forEach(msg => {
         const div = document.createElement("div");
         div.className = "message";
 
-        if (msg.sender === currentUser) {
+        if (msg.sender_username === currentUser) {
             div.classList.add("me");
         }
 
@@ -124,49 +200,58 @@ async function loadMessages() {
 }
 
 async function sendMessage() {
-
     if (!currentGroupId) {
         alert("Selecciona un grupo primero");
         return;
     }
 
-    const content = document.getElementById("messageContent").value;
+    const input = document.getElementById("messageContent");
+    const content = input?.value;
 
-    if (!content.trim()) return;
+    if (!content || !content.trim()) return;
 
-    await fetch(
-        `http://127.0.0.1:8000/api/chat/groups/${currentGroupId}/messages/`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + token
-            },
-            body: JSON.stringify({ content })
+    const response = await fetch(`/api/chat/groups/${currentGroupId}/messages/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({ content })
+    });
+
+    if (!response.ok) {
+        if (response.status === 401) {
+            logout();
+        } else if (response.status === 403) {
+            alert("No perteneces a este grupo");
         }
-    );
+        return;
+    }
 
-    document.getElementById("messageContent").value = "";
+    input.value = "";
     loadMessages();
 }
 
-// create group
-
+// --------------------
+// UI
+// --------------------
 function openCreateGroupModal() {
-    document.getElementById("createGroupModal").style.display = "flex";
+    const modal = document.getElementById("createGroupModal");
+    if (modal) modal.style.display = "flex";
 }
 
 function closeModal() {
-    document.getElementById("createGroupModal").style.display = "none";
+    const modal = document.getElementById("createGroupModal");
+    if (modal) modal.style.display = "none";
 }
 
 async function createGroup() {
+    const nameInput = document.getElementById("newGroupName");
+    const name = nameInput?.value;
 
-    const name = document.getElementById("newGroupName").value;
+    if (!name || !name.trim()) return;
 
-    if (!name.trim()) return;
-
-    await fetch("http://127.0.0.1:8000/api/groups/", {
+    const response = await fetch("/api/groups/", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -175,37 +260,23 @@ async function createGroup() {
         body: JSON.stringify({ name })
     });
 
-    document.getElementById("newGroupName").value = "";
+    if (!response.ok) {
+        alert("No se pudo crear el grupo");
+        return;
+    }
 
+    nameInput.value = "";
     closeModal();
-
     loadGroups();
 }
 
 function toggleUserMenu() {
-
     const menu = document.getElementById("userDropdown");
+    if (!menu) return;
 
     if (menu.style.display === "block") {
         menu.style.display = "none";
     } else {
         menu.style.display = "block";
     }
-
-}
-
-function logout() {
-
-    localStorage.removeItem("token");
-    localStorage.removeItem("username");
-
-    token = null;
-    currentUser = null;
-    currentGroupId = null;
-
-    document.getElementById("appScreen").style.display = "none";
-    
-    document.getElementById("appScreen").style.display = "none";
-    document.getElementById("loginScreen").style.display = "flex";
-
 }
