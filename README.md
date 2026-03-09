@@ -111,7 +111,7 @@ python manage.py runserver
 ```
 
 # Autores 
-- **Juan Esteban Barrios Tovar**
-- **Alejandro García** 
+## **Juan Esteban Barrios Tovar**
+## **Alejandro García** 
 
 
