@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-6b!0+y&@w)+twpyqtn99f0v&_r#2_fr+9n=d8310ru7cpow^(*
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["3.236.123.244"]
 
 
 # Application definition
@@ -123,11 +123,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
-
+STATIC_ROOT = BASE_DIR / "staticfiles"
 from datetime import timedelta
 
 REST_FRAMEWORK = {
