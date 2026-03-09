@@ -39,6 +39,7 @@ El sistema sigue una **arquitectura monolítica**, donde todos los componentes d
 # Despliegue en AWS
 
 La aplicación fue desplegada en una instancia **EC2** utilizando la siguiente arquitectura:
+```bash
 Usuario (Navegador)
 │
 ▼
@@ -52,6 +53,7 @@ Django
 │
 ▼
 SQLite
+```
 
 
 Nginx recibe las peticiones HTTP y las redirige a Gunicorn, que ejecuta la aplicación Django.
