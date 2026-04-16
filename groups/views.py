@@ -1,13 +1,11 @@
-from django.shortcuts import render
 from django.contrib.auth.models import User
+from django.db import transaction
 from rest_framework import status
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 
-
-
+from config.events import publish_domain_event
 from .models import Group, Membership
 from .serializers import GroupSerializer, AddMemberSerializer
 
@@ -28,6 +26,16 @@ def groups_list_create(request):
         created_by=request.user,
     )
     Membership.objects.create(group=group, user=request.user, role="admin")
+    transaction.on_commit(
+        lambda: publish_domain_event(
+            "group.created",
+            {
+                "group_id": group.id,
+                "name": group.name,
+                "created_by": request.user.id,
+            },
+        )
+    )
     return Response(GroupSerializer(group).data, status=status.HTTP_201_CREATED)
 
 
