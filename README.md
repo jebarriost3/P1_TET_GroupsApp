@@ -22,3 +22,17 @@ python auth_service\manage.py runserver 8001
 .venv\Scripts\activate
 python group_service\manage.py runserver 8002
 ```
+
+### Message Service
+
+```powershell
+.venv\Scripts\activate
+python message_service\manage.py runserver 8003
+```
+
+### Gateway Service
+
+```powershell
+.venv\Scripts\activate
+python gateway_service\manage.py runserver 8000
+```
