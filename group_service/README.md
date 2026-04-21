@@ -9,6 +9,13 @@ Servicio independiente de grupos para GroupsApp.
 python group_service\manage.py runserver 8002
 ```
 
+## Servidor gRPC interno
+
+```powershell
+.venv\Scripts\activate
+python group_service\manage.py grpc_server
+```
+
 ## Endpoints
 
 - `GET /health/`

@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package groupsapp.groups.v1;
+
+service GroupInternalService {
+  rpc CheckMembership(CheckMembershipRequest) returns (CheckMembershipResponse);
+}
+
+message CheckMembershipRequest {
+  int64 group_id = 1;
+  int64 user_id = 2;
+}
+
+message CheckMembershipResponse {
+  bool is_member = 1;
+  string role = 2;
+}

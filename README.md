@@ -23,6 +23,13 @@ python auth_service\manage.py runserver 8001
 python group_service\manage.py runserver 8002
 ```
 
+### Group Service gRPC
+
+```powershell
+.venv\Scripts\activate
+python group_service\manage.py grpc_server
+```
+
 ### Message Service
 
 ```powershell

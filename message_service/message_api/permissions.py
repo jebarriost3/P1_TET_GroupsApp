@@ -1,6 +1,6 @@
 from rest_framework.permissions import BasePermission
 
-from .models import Membership
+from .group_client import check_group_membership
 
 
 class IsGroupMember(BasePermission):
@@ -13,4 +13,4 @@ class IsGroupMember(BasePermission):
         if not group_id:
             return False
 
-        return Membership.objects.filter(group_id=group_id, user=request.user).exists()
+        return check_group_membership(group_id=group_id, user_id=request.user.id)

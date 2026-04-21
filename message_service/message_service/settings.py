@@ -122,4 +122,7 @@ RABBITMQ_VHOST = os.getenv("RABBITMQ_VHOST", "/")
 RABBITMQ_EXCHANGE = os.getenv("RABBITMQ_EXCHANGE", "groupsapp.events")
 RABBITMQ_ENABLED = env_bool("RABBITMQ_ENABLED", True)
 
+GROUP_GRPC_HOST = os.getenv("GROUP_GRPC_HOST", "127.0.0.1")
+GROUP_GRPC_PORT = int(os.getenv("GROUP_GRPC_PORT", "50051"))
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
