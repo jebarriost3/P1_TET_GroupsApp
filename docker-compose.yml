@@ -1,16 +1,117 @@
 services:
-  web:
+  gateway:
     build: .
-    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    command: python gateway_service/manage.py runserver 0.0.0.0:8000
     ports:
       - "8000:8000"
     env_file:
       - .env
+    environment:
+      AUTH_SERVICE_URL: http://auth:8001
+      GROUP_SERVICE_URL: http://groups:8002
+      MESSAGE_SERVICE_URL: http://messages:8003
     volumes:
       - .:/app
     depends_on:
-      - postgres
-      - rabbitmq
+      migrations:
+        condition: service_completed_successfully
+      auth:
+        condition: service_started
+      groups:
+        condition: service_started
+      messages:
+        condition: service_started
+
+  auth:
+    build: .
+    command: python auth_service/manage.py runserver 0.0.0.0:8001
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgres
+      RABBITMQ_HOST: rabbitmq
+    volumes:
+      - .:/app
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+
+  groups:
+    build: .
+    command: python group_service/manage.py runserver 0.0.0.0:8002
+    ports:
+      - "8002:8002"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgres
+      RABBITMQ_HOST: rabbitmq
+      GROUP_GRPC_HOST: 0.0.0.0
+    volumes:
+      - .:/app
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+      rabbitmq:
+        condition: service_started
+
+  groups-grpc:
+    build: .
+    command: python group_service/manage.py grpc_server
+    ports:
+      - "50051:50051"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgres
+      RABBITMQ_HOST: rabbitmq
+      GROUP_GRPC_HOST: 0.0.0.0
+    volumes:
+      - .:/app
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+
+  messages:
+    build: .
+    command: python message_service/manage.py runserver 0.0.0.0:8003
+    ports:
+      - "8003:8003"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgres
+      RABBITMQ_HOST: rabbitmq
+      GROUP_GRPC_HOST: groups-grpc
+      MESSAGE_STORAGE: mongo
+      MONGO_URI: mongodb://mongo:27017
+    volumes:
+      - .:/app
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+      rabbitmq:
+        condition: service_started
+      groups-grpc:
+        condition: service_started
+      mongo:
+        condition: service_started
+
+  migrations:
+    build: .
+    command: python manage.py migrate
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgres
+      RABBITMQ_HOST: rabbitmq
+    volumes:
+      - .:/app
+    depends_on:
+      postgres:
+        condition: service_started
 
   postgres:
     image: postgres:16
@@ -32,5 +133,13 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-guest}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-guest}
 
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
 volumes:
   postgres_data:
+  mongo_data:
