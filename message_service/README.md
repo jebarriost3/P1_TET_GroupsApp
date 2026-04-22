@@ -14,3 +14,8 @@ python message_service\manage.py runserver 8003
 - `GET /health/`
 - `GET /groups/{group_id}/messages/`
 - `POST /groups/{group_id}/messages/`
+
+## Persistencia
+
+Por defecto usa PostgreSQL para facilitar pruebas locales manuales.
+En Docker Compose se configura `MESSAGE_STORAGE=mongo` para guardar mensajes en MongoDB.
