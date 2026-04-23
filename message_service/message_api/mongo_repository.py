@@ -27,7 +27,7 @@ def _format_document(document: dict) -> dict:
         "sender": document["sender_id"],
         "sender_username": document.get("sender_username", ""),
         "content": document.get("content", ""),
-        "attachment": document.get("attachment"),
+        "attachment_id": document.get("attachment_id"),
         "created_at": document["created_at"].isoformat(),
     }
 
@@ -38,7 +38,7 @@ def list_messages(group_id: int) -> list[dict]:
     return [_format_document(document) for document in documents]
 
 
-def create_message(group_id: int, sender, content: str, attachment=None) -> dict:
+def create_message(group_id: int, sender, content: str, attachment_id=None) -> dict:
     collection = _get_collection()
     now = datetime.now(timezone.utc)
     document = {
@@ -46,7 +46,7 @@ def create_message(group_id: int, sender, content: str, attachment=None) -> dict
         "sender_id": int(sender.id),
         "sender_username": sender.username,
         "content": content or "",
-        "attachment": attachment,
+        "attachment_id": int(attachment_id) if attachment_id else None,
         "created_at": now,
     }
     result = collection.insert_one(document)

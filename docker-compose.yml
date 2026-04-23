@@ -88,7 +88,8 @@ services:
       POSTGRES_HOST: postgres
       RABBITMQ_HOST: rabbitmq
       GROUP_GRPC_HOST: groups-grpc
-      MESSAGE_STORAGE: mongo
+      FILE_SERVICE_URL: http://files:8004
+      MESSAGE_PERSISTENCE_BACKEND: mongo
       MONGO_URI: mongodb://mongo:27017
     volumes:
       - .:/app

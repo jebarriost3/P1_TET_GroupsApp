@@ -125,9 +125,10 @@ RABBITMQ_ENABLED = env_bool("RABBITMQ_ENABLED", True)
 GROUP_GRPC_HOST = os.getenv("GROUP_GRPC_HOST", "127.0.0.1")
 GROUP_GRPC_PORT = int(os.getenv("GROUP_GRPC_PORT", "50051"))
 
-MESSAGE_STORAGE = os.getenv("MESSAGE_STORAGE", "postgres").lower()
+MESSAGE_PERSISTENCE_BACKEND = os.getenv("MESSAGE_PERSISTENCE_BACKEND", os.getenv("MESSAGE_STORAGE", "postgres")).lower()
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
 MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "groupsapp_messages")
 MONGO_MESSAGES_COLLECTION = os.getenv("MONGO_MESSAGES_COLLECTION", "messages")
+FILE_SERVICE_URL = os.getenv("FILE_SERVICE_URL", "http://127.0.0.1:8004")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

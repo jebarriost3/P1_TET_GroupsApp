@@ -2,6 +2,7 @@ import grpc
 from django.conf import settings
 
 from grpc_contracts import group_service_pb2, group_service_pb2_grpc
+from .models import Membership
 
 
 def check_group_membership(group_id: int, user_id: int) -> bool:
@@ -19,4 +20,7 @@ def check_group_membership(group_id: int, user_id: int) -> bool:
             )
             return response.is_member
     except grpc.RpcError:
-        return False
+        return Membership.objects.filter(
+            group_id=int(group_id),
+            user_id=int(user_id),
+        ).exists()

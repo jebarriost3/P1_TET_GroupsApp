@@ -52,6 +52,21 @@ python file_service\manage.py migrate
 python file_service\manage.py runserver 8004
 ```
 
+## Flujo de archivos en mensajes
+
+1. Subir archivo por gateway a `POST /api/files/upload/`
+2. Tomar el `id` devuelto por `File Service`
+3. Crear mensaje por gateway con `attachment_id`
+
+Ejemplo:
+
+```json
+{
+  "content": "mensaje con adjunto",
+  "attachment_id": 1
+}
+```
+
 ## Docker Compose
 
 Levanta los servicios principales de la arquitectura distribuida:
@@ -70,3 +85,8 @@ Servicios expuestos:
 - Group gRPC: `127.0.0.1:50051`
 - RabbitMQ Management: `http://127.0.0.1:15672`
 - MongoDB: `127.0.0.1:27017`
+
+Notas de configuracion:
+
+- `MESSAGE_PERSISTENCE_BACKEND=postgres` para desarrollo local con PostgreSQL
+- `MESSAGE_PERSISTENCE_BACKEND=mongo` para mensajeria sobre MongoDB
