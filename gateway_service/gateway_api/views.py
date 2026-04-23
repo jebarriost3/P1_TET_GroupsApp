@@ -94,3 +94,9 @@ def proxy_to_groups(request, path: str = ""):
 @csrf_exempt
 def proxy_to_messages(request, path: str = ""):
     return _proxy_request(request, settings.MESSAGE_SERVICE_URL, path)
+
+
+@csrf_exempt
+def proxy_to_files(request, path: str = ""):
+    target_path = f"files/{path}" if path else "files/"
+    return _proxy_request(request, settings.FILE_SERVICE_URL, target_path)

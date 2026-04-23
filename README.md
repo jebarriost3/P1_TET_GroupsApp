@@ -44,6 +44,14 @@ python message_service\manage.py runserver 8003
 python gateway_service\manage.py runserver 8000
 ```
 
+### File Service
+
+```powershell
+.venv\Scripts\activate
+python file_service\manage.py migrate
+python file_service\manage.py runserver 8004
+```
+
 ## Docker Compose
 
 Levanta los servicios principales de la arquitectura distribuida:
@@ -58,6 +66,7 @@ Servicios expuestos:
 - Auth Service: `http://127.0.0.1:8001`
 - Group Service: `http://127.0.0.1:8002`
 - Message Service: `http://127.0.0.1:8003`
+- File Service: `http://127.0.0.1:8004`
 - Group gRPC: `127.0.0.1:50051`
 - RabbitMQ Management: `http://127.0.0.1:15672`
 - MongoDB: `127.0.0.1:27017`

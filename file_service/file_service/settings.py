@@ -37,41 +37,55 @@ ALLOWED_HOSTS = [
 ]
 
 INSTALLED_APPS = [
+    "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "corsheaders",
-    "gateway_api",
+    "rest_framework",
+    "files_api",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
 ]
 
 CORS_ALLOW_ALL_ORIGINS = env_bool("CORS_ALLOW_ALL_ORIGINS", True)
 
-ROOT_URLCONF = "gateway_service.urls"
-WSGI_APPLICATION = "gateway_service.wsgi.application"
-ASGI_APPLICATION = "gateway_service.asgi.application"
+ROOT_URLCONF = "file_service.urls"
+WSGI_APPLICATION = "file_service.wsgi.application"
+ASGI_APPLICATION = "file_service.asgi.application"
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [PROJECT_ROOT / "templates"],
+        "DIRS": [],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
-                "django.contrib.messages.context_processors.messages",
             ],
         },
     }
 ]
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("POSTGRES_DB", "groupsapp"),
+        "USER": os.getenv("POSTGRES_USER", "postgres"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD", ""),
+        "HOST": os.getenv("POSTGRES_HOST", "localhost"),
+        "PORT": os.getenv("POSTGRES_PORT", "5432"),
+    }
+}
 
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = os.getenv("DJANGO_TIME_ZONE", "UTC")
@@ -79,11 +93,23 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "static/"
-STATICFILES_DIRS = [PROJECT_ROOT / "static"]
+MEDIA_URL = "/media/"
+MEDIA_ROOT = PROJECT_ROOT / "media"
 
-AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://127.0.0.1:8001")
-GROUP_SERVICE_URL = os.getenv("GROUP_SERVICE_URL", "http://127.0.0.1:8002")
-MESSAGE_SERVICE_URL = os.getenv("MESSAGE_SERVICE_URL", "http://127.0.0.1:8003")
-FILE_SERVICE_URL = os.getenv("FILE_SERVICE_URL", "http://127.0.0.1:8004")
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",
+    ),
+    "DEFAULT_RENDERER_CLASSES": (
+        "rest_framework.renderers.JSONRenderer",
+    ),
+}
+
+FILE_STORAGE_BACKEND = os.getenv("FILE_STORAGE_BACKEND", "local")
+FILE_STORAGE_ROOT = os.getenv("FILE_STORAGE_ROOT", str(PROJECT_ROOT / "media" / "file_service"))
+FILE_PUBLIC_BASE_URL = os.getenv("FILE_PUBLIC_BASE_URL", "http://127.0.0.1:8004")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

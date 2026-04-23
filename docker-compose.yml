@@ -10,6 +10,7 @@ services:
       AUTH_SERVICE_URL: http://auth:8001
       GROUP_SERVICE_URL: http://groups:8002
       MESSAGE_SERVICE_URL: http://messages:8003
+      FILE_SERVICE_URL: http://files:8004
     volumes:
       - .:/app
     depends_on:
@@ -20,6 +21,8 @@ services:
       groups:
         condition: service_started
       messages:
+        condition: service_started
+      files:
         condition: service_started
 
   auth:
@@ -98,6 +101,22 @@ services:
         condition: service_started
       mongo:
         condition: service_started
+
+  files:
+    build: .
+    command: sh -c "python file_service/manage.py migrate && python file_service/manage.py runserver 0.0.0.0:8004"
+    ports:
+      - "8004:8004"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgres
+      FILE_PUBLIC_BASE_URL: http://127.0.0.1:8004
+    volumes:
+      - .:/app
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
 
   migrations:
     build: .
