@@ -52,6 +52,21 @@ python file_service\manage.py migrate
 python file_service\manage.py runserver 8004
 ```
 
+### Notification Service
+
+```powershell
+.venv\Scripts\activate
+python notification_service\manage.py migrate
+python notification_service\manage.py runserver 8005
+```
+
+### Notification Worker
+
+```powershell
+.venv\Scripts\activate
+python notification_service\manage.py consume_events
+```
+
 ## Flujo de archivos en mensajes
 
 1. Subir archivo por gateway a `POST /api/files/upload/`
@@ -82,6 +97,7 @@ Servicios expuestos:
 - Group Service: `http://127.0.0.1:8002`
 - Message Service: `http://127.0.0.1:8003`
 - File Service: `http://127.0.0.1:8004`
+- Notification Service: `http://127.0.0.1:8005`
 - Group gRPC: `127.0.0.1:50051`
 - RabbitMQ Management: `http://127.0.0.1:15672`
 - MongoDB: `127.0.0.1:27017`
@@ -90,3 +106,5 @@ Notas de configuracion:
 
 - `MESSAGE_PERSISTENCE_BACKEND=postgres` para desarrollo local con PostgreSQL
 - `MESSAGE_PERSISTENCE_BACKEND=mongo` para mensajeria sobre MongoDB
+- `GET /api/notifications/` lista notificaciones del usuario autenticado
+- `POST /api/notifications/<id>/read/` marca una notificacion como leida

@@ -55,5 +55,29 @@ def add_member(request, group_id: int):
     serializer.is_valid(raise_exception=True)
 
     user_to_add = User.objects.get(username=serializer.validated_data["username"])
-    Membership.objects.get_or_create(group=group, user=user_to_add, defaults={"role": "member"})
-    return Response({"detail": f"Usuario {user_to_add.username} agregado al grupo"}, status=status.HTTP_200_OK)
+    membership, created = Membership.objects.get_or_create(
+        group=group,
+        user=user_to_add,
+        defaults={"role": "member"},
+    )
+
+    if created:
+        transaction.on_commit(
+            lambda: publish_domain_event(
+                "member.added",
+                {
+                    "group_id": group.id,
+                    "group_name": group.name,
+                    "added_user_id": user_to_add.id,
+                    "added_username": user_to_add.username,
+                    "added_by_id": request.user.id,
+                    "added_by_username": request.user.username,
+                    "role": membership.role,
+                },
+            )
+        )
+        detail = f"Usuario {user_to_add.username} agregado al grupo"
+    else:
+        detail = f"Usuario {user_to_add.username} ya pertenece al grupo"
+
+    return Response({"detail": detail}, status=status.HTTP_200_OK)

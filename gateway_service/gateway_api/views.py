@@ -100,3 +100,9 @@ def proxy_to_messages(request, path: str = ""):
 def proxy_to_files(request, path: str = ""):
     target_path = f"files/{path}" if path else "files/"
     return _proxy_request(request, settings.FILE_SERVICE_URL, target_path)
+
+
+@csrf_exempt
+def proxy_to_notifications(request, path: str = ""):
+    target_path = f"notifications/{path}" if path else "notifications/"
+    return _proxy_request(request, settings.NOTIFICATION_SERVICE_URL, target_path)

@@ -11,6 +11,7 @@ services:
       GROUP_SERVICE_URL: http://groups:8002
       MESSAGE_SERVICE_URL: http://messages:8003
       FILE_SERVICE_URL: http://files:8004
+      NOTIFICATION_SERVICE_URL: http://notifications:8005
     volumes:
       - .:/app
     depends_on:
@@ -23,6 +24,8 @@ services:
       messages:
         condition: service_started
       files:
+        condition: service_started
+      notifications:
         condition: service_started
 
   auth:
@@ -118,6 +121,38 @@ services:
     depends_on:
       migrations:
         condition: service_completed_successfully
+
+  notifications:
+    build: .
+    command: sh -c "python notification_service/manage.py migrate && python notification_service/manage.py runserver 0.0.0.0:8005"
+    ports:
+      - "8005:8005"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgres
+      RABBITMQ_HOST: rabbitmq
+    volumes:
+      - .:/app
+    depends_on:
+      postgres:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+
+  notifications-worker:
+    build: .
+    command: python notification_service/manage.py consume_events
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgres
+      RABBITMQ_HOST: rabbitmq
+    volumes:
+      - .:/app
+    depends_on:
+      notifications:
+        condition: service_started
 
   migrations:
     build: .
