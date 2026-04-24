@@ -80,6 +80,7 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [PROJECT_ROOT / "static"]
+STATIC_ROOT = PROJECT_ROOT / "staticfiles"
 
 AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://127.0.0.1:8001")
 GROUP_SERVICE_URL = os.getenv("GROUP_SERVICE_URL", "http://127.0.0.1:8002")
