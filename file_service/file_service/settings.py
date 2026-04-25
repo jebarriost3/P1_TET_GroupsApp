@@ -111,5 +111,10 @@ REST_FRAMEWORK = {
 FILE_STORAGE_BACKEND = os.getenv("FILE_STORAGE_BACKEND", "local")
 FILE_STORAGE_ROOT = os.getenv("FILE_STORAGE_ROOT", str(PROJECT_ROOT / "media" / "file_service"))
 FILE_PUBLIC_BASE_URL = os.getenv("FILE_PUBLIC_BASE_URL", "http://127.0.0.1:8004")
+AWS_S3_BUCKET_NAME = os.getenv("AWS_S3_BUCKET_NAME", "")
+AWS_S3_REGION = os.getenv("AWS_S3_REGION", "")
+AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL", "")
+AWS_S3_KEY_PREFIX = os.getenv("AWS_S3_KEY_PREFIX", "attachments")
+AWS_S3_PUBLIC_BASE_URL = os.getenv("AWS_S3_PUBLIC_BASE_URL", "")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

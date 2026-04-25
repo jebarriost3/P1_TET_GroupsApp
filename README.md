@@ -52,6 +52,11 @@ python file_service\manage.py migrate
 python file_service\manage.py runserver 8004
 ```
 
+El `File Service` soporta dos backends de almacenamiento:
+
+- `FILE_STORAGE_BACKEND=local` para desarrollo local
+- `FILE_STORAGE_BACKEND=s3` para despliegue en AWS usando Amazon S3
+
 ### Notification Service
 
 ```powershell
@@ -108,3 +113,5 @@ Notas de configuracion:
 - `MESSAGE_PERSISTENCE_BACKEND=mongo` para mensajeria sobre MongoDB
 - `GET /api/notifications/` lista notificaciones del usuario autenticado
 - `POST /api/notifications/<id>/read/` marca una notificacion como leida
+- `FILE_STORAGE_BACKEND=s3` habilita almacenamiento en S3
+- `AWS_S3_BUCKET_NAME`, `AWS_S3_REGION` y opcionalmente `AWS_S3_PUBLIC_BASE_URL` configuran el backend S3
