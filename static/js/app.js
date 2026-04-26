@@ -216,38 +216,51 @@ async function sendMessage() {
 
     const input = document.getElementById("messageContent");
     const fileInput = document.getElementById("attachmentInput");
+    const sendButton = document.getElementById("sendButton");
     const content = input?.value || "";
     const file = fileInput?.files?.[0] || null;
 
     if (!content.trim() && !file) return;
 
+    if (sendButton) sendButton.disabled = true;
+
     let attachmentId = null;
     if (file) {
         attachmentId = await uploadAttachment(file);
-        if (!attachmentId) return;
+        if (!attachmentId) {
+            if (sendButton) sendButton.disabled = false;
+            return;
+        }
     }
 
-    const response = await fetch(`/api/chat/groups/${currentGroupId}/messages/`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + token
-        },
-        body: JSON.stringify({ content, attachment_id: attachmentId })
-    });
+    const response = await fetch(
+        `/api/chat/groups/${currentGroupId}/messages/`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+            body: JSON.stringify({ content, attachment_id: attachmentId })
+        }
+    );
 
     if (!response.ok) {
         if (response.status === 401) {
             logout();
         } else if (response.status === 403) {
             alert("No perteneces a este grupo");
+        } else {
+            alert("No se pudo enviar el mensaje");
         }
+        if (sendButton) sendButton.disabled = false;
         return;
     }
 
     input.value = "";
     if (fileInput) fileInput.value = "";
     showSelectedFile();
+    if (sendButton) sendButton.disabled = false;
     loadMessages();
 }
 
@@ -274,6 +287,11 @@ async function uploadAttachment(file) {
     const formData = new FormData();
     formData.append("file", file);
 
+    const selectedFileName = document.getElementById("selectedFileName");
+    if (selectedFileName) {
+        selectedFileName.innerText = "Subiendo " + file.name + "...";
+    }
+
     const response = await fetch("/api/files/upload/", {
         method: "POST",
         headers: {
@@ -286,6 +304,7 @@ async function uploadAttachment(file) {
 
     if (!response.ok) {
         alert(data.detail || "No se pudo subir el archivo");
+        showSelectedFile();
         return null;
     }
 
