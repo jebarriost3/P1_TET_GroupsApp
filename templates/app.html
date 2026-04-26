@@ -15,6 +15,11 @@
         <div class="logo">GroupsApp</div>
 
         <div class="user-menu">
+            <button class="notifications-button" onclick="toggleNotifications()">
+                Notificaciones <span id="notificationsBadge">0</span>
+            </button>
+            <div id="notificationsPanel" class="notifications-panel"></div>
+
             <div id="userInfo" onclick="toggleUserMenu()"></div>
 
             <div id="userDropdown" class="dropdown-menu">
@@ -64,6 +69,14 @@
             <div id="messagesContainer"></div>
 
             <div class="message-input">
+                <label class="file-button" for="attachmentInput">Adjuntar</label>
+                <input
+                    type="file"
+                    id="attachmentInput"
+                    onchange="showSelectedFile()"
+                >
+                <span id="selectedFileName"></span>
+
                 <input
                     type="text"
                     id="messageContent"

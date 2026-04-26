@@ -21,6 +21,8 @@ window.onload = function () {
         }
 
         loadGroups();
+        loadNotifications();
+        setInterval(loadNotifications, 30000);
 
         if (currentGroupId) {
             loadMessages();
@@ -192,7 +194,14 @@ async function loadMessages() {
             div.classList.add("me");
         }
 
-        div.innerText = msg.sender_username + ": " + msg.content;
+        const text = document.createElement("div");
+        text.innerText = msg.sender_username + ": " + (msg.content || "");
+        div.appendChild(text);
+
+        if (msg.attachment) {
+            div.appendChild(renderAttachment(msg.attachment));
+        }
+
         container.appendChild(div);
     });
 
@@ -206,9 +215,17 @@ async function sendMessage() {
     }
 
     const input = document.getElementById("messageContent");
-    const content = input?.value;
+    const fileInput = document.getElementById("attachmentInput");
+    const content = input?.value || "";
+    const file = fileInput?.files?.[0] || null;
 
-    if (!content || !content.trim()) return;
+    if (!content.trim() && !file) return;
+
+    let attachmentId = null;
+    if (file) {
+        attachmentId = await uploadAttachment(file);
+        if (!attachmentId) return;
+    }
 
     const response = await fetch(`/api/chat/groups/${currentGroupId}/messages/`, {
         method: "POST",
@@ -216,7 +233,7 @@ async function sendMessage() {
             "Content-Type": "application/json",
             "Authorization": "Bearer " + token
         },
-        body: JSON.stringify({ content })
+        body: JSON.stringify({ content, attachment_id: attachmentId })
     });
 
     if (!response.ok) {
@@ -229,7 +246,118 @@ async function sendMessage() {
     }
 
     input.value = "";
+    if (fileInput) fileInput.value = "";
+    showSelectedFile();
     loadMessages();
+}
+
+function renderAttachment(attachment) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "attachment";
+
+    if (attachment.legacy_reference) {
+        wrapper.innerText = "Adjunto: " + attachment.legacy_reference;
+        return wrapper;
+    }
+
+    const link = document.createElement("a");
+    link.href = attachment.public_url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.innerText = "Abrir adjunto: " + (attachment.original_name || "archivo");
+    wrapper.appendChild(link);
+
+    return wrapper;
+}
+
+async function uploadAttachment(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch("/api/files/upload/", {
+        method: "POST",
+        headers: {
+            "Authorization": "Bearer " + token
+        },
+        body: formData
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+        alert(data.detail || "No se pudo subir el archivo");
+        return null;
+    }
+
+    return data.id;
+}
+
+function showSelectedFile() {
+    const fileInput = document.getElementById("attachmentInput");
+    const label = document.getElementById("selectedFileName");
+    if (!label) return;
+
+    const file = fileInput?.files?.[0];
+    label.innerText = file ? file.name : "";
+}
+
+// --------------------
+// NOTIFICATIONS
+// --------------------
+async function loadNotifications() {
+    if (!token) return;
+
+    const response = await fetch("/api/notifications/", {
+        headers: { "Authorization": "Bearer " + token }
+    });
+
+    if (!response.ok) return;
+
+    const notifications = await response.json();
+    const panel = document.getElementById("notificationsPanel");
+    const badge = document.getElementById("notificationsBadge");
+    if (!panel || !badge) return;
+
+    const unreadCount = notifications.filter(item => !item.is_read).length;
+    badge.innerText = unreadCount;
+    badge.style.display = unreadCount ? "inline-flex" : "none";
+
+    panel.innerHTML = "";
+
+    if (!notifications.length) {
+        const empty = document.createElement("div");
+        empty.className = "notification-empty";
+        empty.innerText = "No tienes notificaciones";
+        panel.appendChild(empty);
+        return;
+    }
+
+    notifications.slice(0, 10).forEach(notification => {
+        const item = document.createElement("div");
+        item.className = "notification-item";
+        if (!notification.is_read) item.classList.add("unread");
+
+        const title = document.createElement("strong");
+        title.innerText = notification.title;
+
+        const body = document.createElement("p");
+        body.innerText = notification.body;
+
+        item.appendChild(title);
+        item.appendChild(body);
+        item.onclick = () => markNotificationAsRead(notification.id);
+
+        panel.appendChild(item);
+    });
+}
+
+async function markNotificationAsRead(notificationId) {
+    await fetch(`/api/notifications/${notificationId}/read/`, {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + token }
+    });
+
+    loadNotifications();
 }
 
 // --------------------
@@ -278,5 +406,15 @@ function toggleUserMenu() {
         menu.style.display = "none";
     } else {
         menu.style.display = "block";
+    }
+}
+
+function toggleNotifications() {
+    const panel = document.getElementById("notificationsPanel");
+    if (!panel) return;
+
+    panel.style.display = panel.style.display === "block" ? "none" : "block";
+    if (panel.style.display === "block") {
+        loadNotifications();
     }
 }
