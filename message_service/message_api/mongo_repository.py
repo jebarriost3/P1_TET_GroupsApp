@@ -28,6 +28,7 @@ def _format_document(document: dict) -> dict:
         "sender_username": document.get("sender_username", ""),
         "content": document.get("content", ""),
         "attachment_id": document.get("attachment_id"),
+        "read_by": document.get("read_by", []),
         "created_at": document["created_at"].isoformat(),
     }
 
@@ -47,8 +48,22 @@ def create_message(group_id: int, sender, content: str, attachment_id=None) -> d
         "sender_username": sender.username,
         "content": content or "",
         "attachment_id": int(attachment_id) if attachment_id else None,
+        "read_by": [int(sender.id)],
         "created_at": now,
     }
     result = collection.insert_one(document)
     document["_id"] = result.inserted_id
     return _format_document(document)
+
+
+def mark_group_messages_read(group_id: int, user_id: int) -> int:
+    collection = _get_collection()
+    result = collection.update_many(
+        {
+            "group_id": int(group_id),
+            "sender_id": {"$ne": int(user_id)},
+            "read_by": {"$ne": int(user_id)},
+        },
+        {"$addToSet": {"read_by": int(user_id)}},
+    )
+    return result.modified_count

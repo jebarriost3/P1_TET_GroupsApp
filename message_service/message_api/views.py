@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from message_service.events import publish_domain_event
 from .models import Message
 from .file_client import FileServiceError, extract_authorization_header, fetch_file_metadata
-from .mongo_repository import create_message, list_messages
+from .mongo_repository import create_message, list_messages, mark_group_messages_read
 from .permissions import IsGroupMember
 from .serializers import MessageInputSerializer, MessageSerializer
 
@@ -53,7 +53,7 @@ class PostgresGroupMessagesView(APIView):
         serializer = MessageSerializer(
             messages,
             many=True,
-            context={"attachments": attachment_map},
+            context={"attachments": attachment_map, "request": request},
         )
         return Response(serializer.data)
 
@@ -95,7 +95,7 @@ class PostgresGroupMessagesView(APIView):
 
         response_serializer = MessageSerializer(
             message,
-            context={"attachments": {message.pk: attachment_metadata}},
+            context={"attachments": {message.pk: attachment_metadata}, "request": request},
         )
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
@@ -104,12 +104,15 @@ class MongoGroupMessagesView(APIView):
     permission_classes = [IsAuthenticated, IsGroupMember]
 
     def get(self, request, group_id: int):
+        mark_group_messages_read(group_id, request.user.id)
         messages = list_messages(group_id)
         attachment_map = _build_attachment_map(messages, extract_authorization_header(request))
 
         for message in messages:
             message["attachment"] = attachment_map.get(message["id"])
             message.pop("attachment_id", None)
+            message["delivery_status"] = _build_delivery_status(message, request.user.id)
+            message.pop("read_by", None)
 
         return Response(messages)
 
@@ -135,6 +138,8 @@ class MongoGroupMessagesView(APIView):
             attachment_id=attachment_id,
         )
         message["attachment"] = attachment_metadata
+        message["delivery_status"] = "sent"
+        message.pop("read_by", None)
 
         publish_domain_event(
             "message.created",
@@ -149,6 +154,16 @@ class MongoGroupMessagesView(APIView):
         )
 
         return Response(message, status=status.HTTP_201_CREATED)
+
+
+def _build_delivery_status(message: dict, current_user_id: int) -> str | None:
+    sender_id = int(message.get("sender") or 0)
+    if sender_id != int(current_user_id):
+        return None
+
+    readers = {int(user_id) for user_id in message.get("read_by", [])}
+    readers.discard(sender_id)
+    return "read" if readers else "delivered"
 
 
 GroupMessagesView = (

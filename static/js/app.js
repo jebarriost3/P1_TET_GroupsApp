@@ -1,8 +1,9 @@
 let token = localStorage.getItem("token") || null;
 let currentUser = localStorage.getItem("username") || null;
 let currentGroupId = localStorage.getItem("selectedGroupId") || null;
+let messagesRefreshTimer = null;
 
-console.log("GroupsApp frontend version: attachments-v2");
+console.log("GroupsApp frontend version: read-status-v1");
 
 // --------------------
 // INIT
@@ -25,6 +26,11 @@ window.onload = function () {
         loadGroups();
         loadNotifications();
         setInterval(loadNotifications, 30000);
+        messagesRefreshTimer = setInterval(() => {
+            if (currentGroupId) {
+                loadMessages(false);
+            }
+        }, 5000);
 
         if (currentGroupId) {
             loadMessages();
@@ -168,7 +174,7 @@ async function addMemberPrompt() {
 // --------------------
 // MESSAGES
 // --------------------
-async function loadMessages() {
+async function loadMessages(shouldScroll = true) {
     if (!currentGroupId) return;
 
     const response = await fetch(`/api/chat/groups/${currentGroupId}/messages/`, {
@@ -204,10 +210,16 @@ async function loadMessages() {
             div.appendChild(renderAttachment(msg.attachment));
         }
 
+        if (msg.sender_username === currentUser && msg.delivery_status) {
+            div.appendChild(renderDeliveryStatus(msg.delivery_status));
+        }
+
         container.appendChild(div);
     });
 
-    container.scrollTop = container.scrollHeight;
+    if (shouldScroll) {
+        container.scrollTop = container.scrollHeight;
+    }
 }
 
 async function sendMessage() {
@@ -283,6 +295,24 @@ function renderAttachment(attachment) {
     wrapper.appendChild(link);
 
     return wrapper;
+}
+
+function renderDeliveryStatus(status) {
+    const statusElement = document.createElement("div");
+    statusElement.className = "delivery-status";
+
+    const labels = {
+        sent: "✓ enviado",
+        delivered: "✓✓ entregado",
+        read: "✓✓ leído"
+    };
+
+    statusElement.innerText = labels[status] || status;
+    if (status === "read") {
+        statusElement.classList.add("read");
+    }
+
+    return statusElement;
 }
 
 async function uploadAttachment(file) {
