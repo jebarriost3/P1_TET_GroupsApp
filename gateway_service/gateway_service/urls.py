@@ -16,7 +16,11 @@ urlpatterns = [
     path("", include("gateway_api.frontend_urls")),
     path("health/", lambda request: JsonResponse({"status": "ok", "service": "gateway-service"})),
     path("api/health/", lambda request: JsonResponse({"status": "ok", "service": "gateway-service"})),
-    re_path(r"^static/(?P<path>.*)$", serve, {"document_root": settings.STATIC_ROOT}),
+    re_path(
+        r"^static/(?P<path>.*)$",
+        serve,
+        {"document_root": settings.STATICFILES_DIRS[0] if settings.STATICFILES_DIRS else settings.STATIC_ROOT},
+    ),
     re_path(r"^api/auth/(?P<path>.*)$", proxy_to_auth),
     re_path(r"^api/groups/(?P<path>.*)$", proxy_to_groups),
     re_path(r"^api/chat/(?P<path>.*)$", proxy_to_messages),
