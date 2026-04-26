@@ -36,7 +36,6 @@ services:
     env_file:
       - .env
     environment:
-      POSTGRES_HOST: postgres
       RABBITMQ_HOST: rabbitmq
     volumes:
       - .:/app
@@ -52,7 +51,6 @@ services:
     env_file:
       - .env
     environment:
-      POSTGRES_HOST: postgres
       RABBITMQ_HOST: rabbitmq
       GROUP_GRPC_HOST: 0.0.0.0
     volumes:
@@ -71,7 +69,6 @@ services:
     env_file:
       - .env
     environment:
-      POSTGRES_HOST: postgres
       RABBITMQ_HOST: rabbitmq
       GROUP_GRPC_HOST: 0.0.0.0
     volumes:
@@ -88,7 +85,6 @@ services:
     env_file:
       - .env
     environment:
-      POSTGRES_HOST: postgres
       RABBITMQ_HOST: rabbitmq
       GROUP_GRPC_HOST: groups-grpc
       FILE_SERVICE_URL: http://files:8004
@@ -113,9 +109,6 @@ services:
       - "8004:8004"
     env_file:
       - .env
-    environment:
-      POSTGRES_HOST: postgres
-      FILE_PUBLIC_BASE_URL: http://127.0.0.1:8004
     volumes:
       - .:/app
     depends_on:
@@ -130,13 +123,10 @@ services:
     env_file:
       - .env
     environment:
-      POSTGRES_HOST: postgres
       RABBITMQ_HOST: rabbitmq
     volumes:
       - .:/app
     depends_on:
-      postgres:
-        condition: service_started
       rabbitmq:
         condition: service_started
 
@@ -146,7 +136,6 @@ services:
     env_file:
       - .env
     environment:
-      POSTGRES_HOST: postgres
       RABBITMQ_HOST: rabbitmq
     volumes:
       - .:/app
@@ -160,13 +149,9 @@ services:
     env_file:
       - .env
     environment:
-      POSTGRES_HOST: postgres
       RABBITMQ_HOST: rabbitmq
     volumes:
       - .:/app
-    depends_on:
-      postgres:
-        condition: service_started
 
   postgres:
     image: postgres:16
