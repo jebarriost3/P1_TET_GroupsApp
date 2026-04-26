@@ -2,6 +2,8 @@ let token = localStorage.getItem("token") || null;
 let currentUser = localStorage.getItem("username") || null;
 let currentGroupId = localStorage.getItem("selectedGroupId") || null;
 
+console.log("GroupsApp frontend version: attachments-v2");
+
 // --------------------
 // INIT
 // --------------------
