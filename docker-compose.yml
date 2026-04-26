@@ -1,4 +1,14 @@
 services:
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      gateway:
+        condition: service_started
+
   gateway:
     build: .
     command: python gateway_service/manage.py runserver 0.0.0.0:8000
