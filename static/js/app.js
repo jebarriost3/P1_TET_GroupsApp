@@ -2,8 +2,10 @@ let token = localStorage.getItem("token") || null;
 let currentUser = localStorage.getItem("username") || null;
 let currentGroupId = localStorage.getItem("selectedGroupId") || null;
 let messagesRefreshTimer = null;
+let membersRefreshTimer = null;
+let presenceTimer = null;
 
-console.log("GroupsApp frontend version: read-status-v1");
+console.log("GroupsApp frontend version: presence-members-v1");
 
 // --------------------
 // INIT
@@ -25,15 +27,23 @@ window.onload = function () {
 
         loadGroups();
         loadNotifications();
+        sendPresenceHeartbeat();
         setInterval(loadNotifications, 30000);
+        presenceTimer = setInterval(sendPresenceHeartbeat, 20000);
         messagesRefreshTimer = setInterval(() => {
             if (currentGroupId) {
                 loadMessages(false);
             }
         }, 5000);
+        membersRefreshTimer = setInterval(() => {
+            if (currentGroupId) {
+                loadMembers();
+            }
+        }, 10000);
 
         if (currentGroupId) {
             loadMessages();
+            loadMembers();
         }
     }
 };
@@ -125,6 +135,13 @@ async function loadGroups() {
     groups.forEach(group => {
         const div = document.createElement("div");
         div.className = "group-item";
+        if (String(group.id) === String(currentGroupId)) {
+            div.classList.add("active");
+            const chatHeader = document.getElementById("chatHeader");
+            if (chatHeader) {
+                chatHeader.innerText = group.name;
+            }
+        }
         div.innerText = group.name;
         div.onclick = () => selectGroup(group.id, group.name);
         container.appendChild(div);
@@ -141,6 +158,54 @@ function selectGroup(groupId, groupName) {
     }
 
     loadMessages();
+    loadMembers();
+    loadGroups();
+}
+
+async function loadMembers() {
+    if (!currentGroupId) return;
+
+    const response = await fetch(`/api/groups/${currentGroupId}/members/`, {
+        headers: { "Authorization": "Bearer " + token }
+    });
+
+    if (!response.ok) return;
+
+    const members = await response.json();
+    const container = document.getElementById("membersList");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    members.forEach(member => {
+        const item = document.createElement("div");
+        item.className = "member-item";
+
+        const status = document.createElement("span");
+        status.className = "presence-dot " + (member.is_online ? "online" : "offline");
+
+        const name = document.createElement("span");
+        name.className = "member-name";
+        name.innerText = member.username;
+
+        const role = document.createElement("span");
+        role.className = "member-role";
+        role.innerText = member.role === "admin" ? "admin" : "miembro";
+
+        item.appendChild(status);
+        item.appendChild(name);
+        item.appendChild(role);
+        container.appendChild(item);
+    });
+}
+
+async function sendPresenceHeartbeat() {
+    if (!token) return;
+
+    await fetch("/api/groups/presence/", {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + token }
+    }).catch(() => {});
 }
 
 async function addMemberPrompt() {
@@ -169,6 +234,7 @@ async function addMemberPrompt() {
     }
 
     alert(data.detail || "Usuario agregado correctamente");
+    loadMembers();
 }
 
 // --------------------

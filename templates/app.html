@@ -3,7 +3,7 @@
 <html>
 <head>
     <title>GroupsApp</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=20260426-read-status-v1">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=20260426-presence-members-v1">
 </head>
 
 <body>
@@ -60,6 +60,11 @@
             </div>
 
             <div id="groupsList"></div>
+
+            <div class="members-section">
+                <div class="members-title">Miembros</div>
+                <div id="membersList"></div>
+            </div>
         </div>
 
         <!-- CHAT -->
@@ -95,7 +100,7 @@
     </div>
 </div>
 
-<script src="{% static 'js/app.js' %}?v=20260426-read-status-v1"></script>
+<script src="{% static 'js/app.js' %}?v=20260426-presence-members-v1"></script>
 
 </body>
 </html>
